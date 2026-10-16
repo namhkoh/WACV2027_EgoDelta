@@ -16,7 +16,8 @@ export type Clip = {
   tab: string;
   /** Tabs sharing a group are shown on one labelled row. */
   group?: string;
-  title: string;
+  /** Heading above the panels; omit when the tab label says enough. */
+  title?: string;
   panels: Panel[];
 };
 
@@ -41,12 +42,19 @@ export const teaserVideos: { tab: string; src: string; caption: string; aspect: 
   },
 ];
 
-// One sample deleafing removal, left to right: the Aria demonstration, an illustrative animation of the
+// One sample removal per task, left to right: the Aria demonstration, an illustrative animation of the
 // pipeline built from its frames (tools/demo-film), and the robot performing the task.
-export const demonstration: Panel[] = [
-  { label: "Egocentric demonstration", src: "videos/demo_egocentric.mp4", aspect: EGO },
-  { label: "EgoDelta pipeline (illustration)", src: "videos/demo_pipeline.mp4", aspect: EGO, ours: true },
-  { label: "Robot execution", src: "videos/demo_robot.mp4", aspect: EGO },
+function flow(task: string): Panel[] {
+  return [
+    { label: "Egocentric demonstration", src: `videos/demo_${task}_egocentric.mp4`, aspect: EGO },
+    { label: "EgoDelta pipeline (illustration)", src: `videos/demo_${task}_pipeline.mp4`, aspect: EGO, ours: true },
+    { label: "Robot execution", src: `videos/demo_${task}_robot.mp4`, aspect: EGO },
+  ];
+}
+
+export const demonstrations: Clip[] = [
+  { tab: "deleafing", panels: flow("deleaf") },
+  { tab: "harvesting", panels: flow("harvest") },
 ];
 
 // Learned-policy runs filmed with a phone and sped up 3x: harvesting is

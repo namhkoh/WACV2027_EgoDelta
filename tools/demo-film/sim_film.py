@@ -8,7 +8,10 @@ import numpy as np
 import torch
 from PIL import Image, ImageDraw, ImageFont
 
-d_dir, out_path, still_dir = sys.argv[1:4]
+# Usage: sim_film.py DATA_DIR OUT.mp4|- STILLS_DIR PREFIX TARGET_X TARGET_Y PULL_X PULL_Y
+# (target in original 1408 px frame coordinates; pull in output pixels)
+d_dir, out_path, still_dir, prefix = sys.argv[1:5]
+TX, TY, PX, PY = map(float, sys.argv[5:9])
 FFMPEG = "C:/Users/USER/miniconda3/Library/bin/ffmpeg.exe"
 dev = "cuda"
 W, FPS = 720, 30
@@ -22,12 +25,12 @@ def load(name):
     return cv2.resize(im, (W, W), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
 
 
-pre, post = load("dl_pre.png"), load("dl_postclean.png")
-mask = cv2.resize(np.load(f"{d_dir}/dl_mask.npy"), (W, W), interpolation=cv2.INTER_AREA)
-diff = cv2.resize(np.load(f"{d_dir}/dl_diff.npy"), (W, W), interpolation=cv2.INTER_AREA)
+pre, post = load(f"{prefix}_pre.png"), load(f"{prefix}_postclean.png")
+mask = cv2.resize(np.load(f"{d_dir}/{prefix}_mask.npy"), (W, W), interpolation=cv2.INTER_AREA)
+diff = cv2.resize(np.load(f"{d_dir}/{prefix}_diff.npy"), (W, W), interpolation=cv2.INTER_AREA)
 yy, xx = np.mgrid[:W, :W]
 circle = ((xx - W / 2) ** 2 + (yy - W / 2) ** 2) < (0.47 * W) ** 2
-TARGET = np.array([500 * S0, 678 * S0], np.float32)
+TARGET = np.array([TX * S0, TY * S0], np.float32)
 INFERNO = cv2.applyColorMap(np.arange(256, dtype=np.uint8)[:, None], cv2.COLORMAP_INFERNO)[:, 0, ::-1] / 255.0
 
 
@@ -146,7 +149,7 @@ def bezier(ps, u):
     return (1 - u) ** 3 * a + 3 * (1 - u) ** 2 * u * b + 3 * (1 - u) * u * u * c + u ** 3 * d
 PATH = bezier([np.array([W * 1.15, W * 0.86]), np.array([W * 0.82, W * 0.80]), TARGET + [150, 55], TARGET + [16, 4]], np.linspace(0, 1, 160))
 PATH = np.vstack([PATH, np.linspace(TARGET + [16, 4], TARGET, 12)])
-PULL = np.array([-48, 28], np.float32)
+PULL = np.array([PX, PY], np.float32)
 
 font = ImageFont.truetype("C:/Windows/Fonts/seguisb.ttf", 31)
 font_small = ImageFont.truetype("C:/Windows/Fonts/seguisb.ttf", 16)
@@ -177,6 +180,7 @@ def frame(t):
     out_k = ramp(t, D0 + delay, D0 + delay + 1.2) * (1 - ramp(t, H0 + delay * 0.5, H0 + delay * 0.5 + 0.9))
     pull = ramp(t, P0 + 0.2, P1 + 0.2)
     rm = removed
+    op[rm] *= 1 + 2 * ramp(t, D0, D0 + 0.2)  # moving removed splats stay solid over the background fill
     p[rm] += fly[rm] * (out_k[rm] ** 1.5)[:, None] + PULL * pull
     op[rm] *= (1 - out_k[rm]) * (1 - ramp(t, P0 + 0.9, P1 + 0.45))
     sa[rm] *= 1 - 0.5 * out_k[rm]; sb[rm] *= 1 - 0.5 * out_k[rm]
@@ -184,7 +188,7 @@ def frame(t):
     hk = ramp(t, H0 + 0.3, H1) * (1 - ramp(t, C0, C1))
     col = lerp(col, heat, hk)
     # --- post-action fill behind the branch
-    fo = ramp(t, D0 + 0.3, D1) * (1 - ramp(t, H0, H0 + 0.8)) + ramp(t, P0 + 0.8, P1 + 0.4)
+    fo = ramp(t, D0 + 0.3, D1) * (1 - ramp(t, H0, H0 + 0.8)) + ramp(t, P0 + 0.15, P0 + 0.6)
     fo = min(fo, 1.0)
     P = np.vstack([to_screen(p, z, f, par, pz), to_screen(fill_s["p"], z, f, par, fz)])
     img = render(P, np.concatenate([sa, fill_s["sa"]]) * z, np.concatenate([sb, fill_s["sb"]]) * z,

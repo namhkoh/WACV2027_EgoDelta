@@ -4,12 +4,16 @@ import subprocess, sys
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-src_dir, out_path = sys.argv[1:3]
+# Usage: ego_clip.py CLIPS_DIR OUT.mp4 deleaf|harvest
+src_dir, out_path, task = sys.argv[1:4]
 FFMPEG = "C:/Users/USER/miniconda3/Library/bin/ffmpeg.exe"
 W, FPS = 720, 30
 ACC = (70, 209, 139)
 font = ImageFont.truetype("C:/Windows/Fonts/seguisb.ttf", 31)
-PARTS = [("pre_deleaf.mov", 2.0, "Pre-action views"), ("dur_deleaf.mov", 1.5, "Removal"), ("post_deleaf.mov", 2.0, "Post-action views")]
+PARTS = {
+    "deleaf": [("pre_deleaf.mov", 2.0, "Pre-action views"), ("dur_deleaf.mov", 1.5, "Removal"), ("post_deleaf.mov", 2.0, "Post-action views")],
+    "harvest": [("dur_harvest.mov", 1.5, "Removal"), ("post_harvest.mov", 2.0, "Post-action views")],
+}[task]
 
 
 def frames(path, speed):

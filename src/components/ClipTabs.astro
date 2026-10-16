@@ -8,9 +8,11 @@ interface Props {
   sec: string;
   label: string;
   clips: Clip[];
+  /** Lay the panels out as a left-to-right flow with chevrons instead of a grid. */
+  flow?: boolean;
 }
 
-const { sec, label, clips } = Astro.props;
+const { sec, label, clips, flow = false } = Astro.props;
 ---
 
 <TabBar sec={sec} label={label} tabs={clips.map((c) => ({ label: c.tab, group: c.group }))} />
@@ -19,14 +21,27 @@ const { sec, label, clips } = Astro.props;
     clips.map((clip, i) => (
       <TabPanel sec={sec} i={i}>
         <div class="clip">
-          <div class="clip-head">
-            <h3>{clip.title}</h3>
-          </div>
-          <div class={`grid grid${clip.panels.length}`}>
-            {clip.panels.map((p) => (
-              <VideoPanel src={p.src} label={p.label} ours={p.ours} aspect={p.aspect} />
-            ))}
-          </div>
+          {clip.title && (
+            <div class="clip-head">
+              <h3>{clip.title}</h3>
+            </div>
+          )}
+          {flow ? (
+            <div class="flow">
+              {clip.panels.map((p, k) => (
+                <>
+                  {k > 0 && <span class="flow-arrow" aria-hidden="true" />}
+                  <VideoPanel src={p.src} label={p.label} ours={p.ours} aspect={p.aspect} />
+                </>
+              ))}
+            </div>
+          ) : (
+            <div class={`grid grid${clip.panels.length}`}>
+              {clip.panels.map((p) => (
+                <VideoPanel src={p.src} label={p.label} ours={p.ours} aspect={p.aspect} />
+              ))}
+            </div>
+          )}
         </div>
       </TabPanel>
     ))
