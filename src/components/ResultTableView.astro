@@ -1,0 +1,71 @@
+---
+import type { ResultTable } from "../data/results";
+
+interface Props {
+  table: ResultTable;
+}
+
+const { table } = Astro.props;
+
+// Bold the best value in each column, as in the paper.
+const best = table.columns.map((c, j) => {
+  const vals = table.rows.map((r) => r.values[j]);
+  return c.better === "up" ? Math.max(...vals) : Math.min(...vals);
+});
+
+const fmt = (v: number, j: number) => {
+  const c = table.columns[j];
+  return c.outOf ? `${v}/${c.outOf}` : v.toFixed(c.decimals);
+};
+const arrow = (j: number) => (table.columns[j].better === "up" ? "↑" : "↓");
+---
+
+<div class="rtable">
+  <div class="rtable-title">{table.title}</div>
+  <div class="rtable-scroll">
+    <table>
+      <thead>
+        {
+          table.groups && (
+            <tr class="group-row">
+              <th />
+              {table.groups.map((g) => (
+                <th colspan={g.span}>{g.label}</th>
+              ))}
+            </tr>
+          )
+        }
+        <tr>
+          <th scope="col">Method</th>
+          {
+            table.columns.map((c, j) => (
+              <th scope="col">
+                {c.label} {c.outOf ? "" : arrow(j)}
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          table.rows.map((r) => (
+            <>
+              {r.section && (
+                <tr class:list={["section-row", { divider: r.divider }]}>
+                  <td colspan={table.columns.length + 1}>{r.section}</td>
+                </tr>
+              )}
+              <tr class:list={{ ours: r.ours, divider: r.divider && !r.section }}>
+                <th scope="row">{r.method}</th>
+                {r.values.map((v, j) => (
+                  <td class:list={{ best: v === best[j] }}>{fmt(v, j)}</td>
+                ))}
+              </tr>
+            </>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+  <p class="rtable-caption">{table.caption} Best results per column are in bold.</p>
+</div>

@@ -1,0 +1,50 @@
+---
+// Pill-shaped tab bar; pair it with <TabPanel> elements using the same `sec`.
+// Tabs that share a `group` are rendered on one labelled row.
+interface Props {
+  sec: string;
+  label: string;
+  tabs: { label: string; group?: string }[];
+  centered?: boolean;
+}
+
+const { sec, label, tabs, centered = false } = Astro.props;
+
+const indexed = tabs.map((t, i) => ({ ...t, i }));
+const groups: { name?: string; tabs: typeof indexed }[] = [];
+for (const t of indexed) {
+  const last = groups.at(-1);
+  if (last && last.name === t.group) last.tabs.push(t);
+  else groups.push({ name: t.group, tabs: [t] });
+}
+const grouped = groups.some((g) => g.name);
+---
+
+<div class:list={["tabs", { centered }]} role="tablist" aria-label={label} data-sec={sec}>
+  {
+    groups.map((g) => {
+      const buttons = g.tabs.map((t) => (
+        <button
+          class="tab"
+          type="button"
+          role="tab"
+          id={`${sec}-tab-${t.i}`}
+          aria-controls={`${sec}-panel-${t.i}`}
+          aria-selected={t.i === 0 ? "true" : "false"}
+          tabindex={t.i === 0 ? 0 : -1}
+          data-i={t.i}
+        >
+          {t.label}
+        </button>
+      ));
+      return grouped ? (
+        <div class="tabgroup">
+          {g.name && <span class="tabgroup-label">{g.name}</span>}
+          {buttons}
+        </div>
+      ) : (
+        buttons
+      );
+    })
+  }
+</div>

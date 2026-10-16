@@ -1,12 +1,39 @@
 ---
+import { Picture } from "astro:assets";
 
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  /** CSS max-width of the figure, e.g. "980px". */
+  maxWidth?: string;
+  priority?: boolean;
+}
+
+const { src, alt, maxWidth, priority = false } = Astro.props;
+
+// Never ask for a width above the source; always include the source width.
+const widths = [...new Set([640, 960, 1280, 1800, 2400].filter((w) => w < src.width).concat(src.width))];
+const sizes = maxWidth
+  ? `(max-width: 1180px) calc(100vw - 48px), ${maxWidth}`
+  : "(max-width: 1180px) calc(100vw - 48px), 1132px";
 ---
 
-<figure>
-  <div class="flex w-full justify-center **:my-0">
-    <slot name="figure" />
-  </div>
-  <figcaption class="text-center">
-    <slot name="caption" />
-  </figcaption>
+<figure class="paper-fig" style={maxWidth ? `max-width:${maxWidth}` : undefined}>
+  <Picture
+    src={src}
+    alt={alt}
+    widths={widths}
+    sizes={sizes}
+    formats={["avif"]}
+    fallbackFormat="webp"
+    quality={82}
+    priority={priority}
+  />
+  {
+    Astro.slots.has("default") && (
+      <figcaption>
+        <slot />
+      </figcaption>
+    )
+  }
 </figure>

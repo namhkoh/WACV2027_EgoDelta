@@ -1,12 +1,10 @@
 import js from "@eslint/js";
 import globals from "globals";
 import typescript from "typescript-eslint";
-import react from "@eslint-react/eslint-plugin";
 import astro from "eslint-plugin-astro";
 import json from "@eslint/json";
 import markdown from "@eslint/markdown";
 import css from "@eslint/css";
-import { tailwind4 } from "tailwind-csstree";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
@@ -34,7 +32,6 @@ export default defineConfig([
   },
   {
     files: ["**/*.ts", "**/*.tsx"],
-    extends: [react.configs["recommended-typescript"]],
     languageOptions: {
       parser: typescript.parser,
       parserOptions: {
@@ -54,11 +51,12 @@ export default defineConfig([
     files: ["**/*.css"],
     plugins: { css },
     language: "css/css",
-    languageOptions: { customSyntax: tailwind4 },
     extends: [css.configs.recommended],
     rules: {
-      // Disable rules that don't work well with Tailwind v4 syntax
-      "css/no-invalid-at-rules": "off",
+      // The font stacks reference variables that Astro's font API injects at build time.
+      "css/no-invalid-properties": ["error", { allowUnknownVariables: true }],
+      // text-wrap: balance and :has() are progressive enhancements here.
+      "css/use-baseline": ["error", { available: "newly" }],
     },
   },
 ]);

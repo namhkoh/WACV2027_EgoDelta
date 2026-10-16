@@ -1,0 +1,94 @@
+---
+import type { Chart } from "../data/results";
+
+interface Props {
+  chart: Chart;
+}
+
+const { chart } = Astro.props;
+
+// Rendered at build time; page.ts only adds the grow-in animation and tooltip.
+const W = 320;
+const H = 262;
+const L = 34;
+const R = 6;
+const T = 20;
+const B = 48;
+const pw = W - L - R;
+const ph = H - T - B;
+const ticks = [0, 1, 2, 3, 4].map((k) => (chart.max * k) / 4);
+const cw = pw / chart.bars.length;
+const bw = Math.min(46, cw * 0.62);
+const greys = ["b0", "b1"];
+const lastOurs = chart.bars.findLastIndex((b) => b.ours);
+
+const bars = chart.bars.map((b, i) => {
+  const h = (ph * b.value) / chart.max;
+  const cx = L + cw * i + cw / 2;
+  const tone = b.ours ? (i === lastOurs ? "ours" : "ours-soft") : greys[i % greys.length];
+  const name = b.label.join(" ");
+  return {
+    ...b,
+    cx,
+    x: cx - bw / 2,
+    y: T + ph - h,
+    h,
+    tone,
+    text: b.value.toFixed(chart.decimals),
+    tip: `${name}: ${b.value.toFixed(chart.decimals)}${chart.unit} · ${b.detail}`,
+  };
+});
+const summary = `${chart.title}, ${chart.note}: ${bars.map((b) => `${b.label.join(" ")} ${b.text}${chart.unit}`).join(", ")}`;
+---
+
+<figure class="qchart">
+  <div class="qtitle">{chart.title}</div>
+  <div class="qnote">{chart.note}</div>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={summary}>
+    {
+      ticks.map((t, k) => {
+        const y = T + ph - (ph * k) / 4;
+        return (
+          <>
+            <line x1={L} x2={W - R} y1={y} y2={y} class={k ? "gridline" : "base"} />
+            <text x={L - 6} y={y + 4} text-anchor="end" class="tick">
+              {t}
+            </text>
+          </>
+        );
+      })
+    }
+    {
+      bars.map((b, i) => (
+        <>
+          <rect
+            class={`bar ${b.tone}`}
+            x={b.x}
+            y={b.y}
+            width={bw}
+            height={b.h}
+            rx="4"
+            style={`--d:${i * 120}ms`}
+            data-tip={b.tip}
+          />
+          <text
+            x={b.cx}
+            y={b.y - 6}
+            text-anchor="middle"
+            class:list={["val", { ours: b.ours }]}
+            style={`--d:${i * 120}ms`}
+          >
+            {b.text}
+          </text>
+          <text x={b.cx} y={H - B + 18} text-anchor="middle" class:list={["glabel", { ours: b.ours }]}>
+            {b.label.map((line, k) => (
+              <tspan x={b.cx} dy={k ? 14 : 0}>
+                {line}
+              </tspan>
+            ))}
+          </text>
+        </>
+      ))
+    }
+  </svg>
+</figure>

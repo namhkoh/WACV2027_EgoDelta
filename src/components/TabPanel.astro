@@ -1,0 +1,19 @@
+---
+interface Props {
+  sec: string;
+  i: number;
+}
+
+const { sec, i } = Astro.props;
+---
+
+<div
+  class="panel-item"
+  role="tabpanel"
+  id={`${sec}-panel-${i}`}
+  aria-labelledby={`${sec}-tab-${i}`}
+  data-i={i}
+  hidden={i !== 0}
+>
+  <slot />
+</div>

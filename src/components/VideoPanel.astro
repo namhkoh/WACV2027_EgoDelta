@@ -1,0 +1,38 @@
+---
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
+interface Props {
+  /** Path under public/, e.g. "videos/harvest1_demo.mp4". */
+  src: string;
+  label?: string;
+  ours?: boolean;
+  aspect?: string;
+  /** Rounded media without the card frame (used by the teaser). */
+  bare?: boolean;
+}
+
+const { src, label, ours = false, aspect = "16 / 9", bare = false } = Astro.props;
+
+// Builds run from the project root, so public/ is resolved from there.
+const exists = existsSync(join(process.cwd(), "public", src));
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+---
+
+<figure class:list={[bare ? "bare" : "card", { ours }]}>
+  {
+    exists ? (
+      <video data-src={base + src} loop muted playsinline preload="none" />
+    ) : (
+      <div class="placeholder" style={`aspect-ratio:${aspect}`}>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2.5" y="5" width="14" height="14" rx="2.5" />
+          <path d="M16.5 10.2 21.5 7v10l-5-3.2" />
+        </svg>
+        <span>video coming soon</span>
+        <code>public/{src}</code>
+      </div>
+    )
+  }
+  {label && <figcaption>{label}</figcaption>}
+</figure>

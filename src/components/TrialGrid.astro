@@ -1,0 +1,40 @@
+---
+import { trials } from "../data/results";
+
+// One dot per physical trial (Table 5). Dots only encode counts; they do not
+// reflect the order in which successes and failures happened.
+const total = trials.reduce((n, t) => n + t.settings.reduce((m, s) => m + s.total, 0), 0);
+---
+
+<div class="trials">
+  <div class="trials-head">
+    <h3>{total} physical robot trials</h3>
+    <ul class="qlegend">
+      <li><span class="dot ok ours" />success (EgoDelta)</li>
+      <li><span class="dot ok" />success (baseline)</li>
+      <li><span class="dot" />failure</li>
+    </ul>
+  </div>
+  {
+    trials.map((t) => (
+      <div class:list={["trial-row", { ours: t.ours }]}>
+        <div class="trial-mode">{t.mode}</div>
+        {t.settings.map((s) => (
+          <div class="trial-cell">
+            <div class="trial-label">
+              <span>{s.label}</span>
+              <span class="trial-count">
+                {s.successes}/{s.total}
+              </span>
+            </div>
+            <div class="dots" role="img" aria-label={`${t.mode}, ${s.label}: ${s.successes} of ${s.total} trials succeeded`}>
+              {Array.from({ length: s.total }, (_, k) => (
+                <span class:list={["dot", { ok: k < s.successes, ours: t.ours }]} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    ))
+  }
+</div>

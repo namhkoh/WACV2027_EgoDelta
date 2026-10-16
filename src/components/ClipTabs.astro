@@ -1,0 +1,34 @@
+---
+import type { Clip } from "../data/media";
+import TabBar from "./TabBar.astro";
+import TabPanel from "./TabPanel.astro";
+import VideoPanel from "./VideoPanel.astro";
+
+interface Props {
+  sec: string;
+  label: string;
+  clips: Clip[];
+}
+
+const { sec, label, clips } = Astro.props;
+---
+
+<TabBar sec={sec} label={label} tabs={clips.map((c) => ({ label: c.tab, group: c.group }))} />
+<div class="panel" data-sec={sec}>
+  {
+    clips.map((clip, i) => (
+      <TabPanel sec={sec} i={i}>
+        <div class="clip">
+          <div class="clip-head">
+            <h3>{clip.title}</h3>
+          </div>
+          <div class={`grid grid${clip.panels.length}`}>
+            {clip.panels.map((p) => (
+              <VideoPanel src={p.src} label={p.label} ours={p.ours} aspect={p.aspect} />
+            ))}
+          </div>
+        </div>
+      </TabPanel>
+    ))
+  }
+</div>

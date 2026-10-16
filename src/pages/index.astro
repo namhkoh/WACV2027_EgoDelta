@@ -1,68 +1,275 @@
 ---
-import { Font } from "astro:assets";
+import { Font, getImage } from "astro:assets";
 
-import Table from "../components/Table.astro";
+import "../styles/site.css";
 
-import "../styles/global.css";
-import "katex/dist/katex-swap.css";
+import BarChart from "../components/BarChart.astro";
+import ClipTabs from "../components/ClipTabs.astro";
+import Figure from "../components/Figure.astro";
+import Logo from "../components/Logo.astro";
+import ResultTableView from "../components/ResultTableView.astro";
+import TabBar from "../components/TabBar.astro";
+import TabPanel from "../components/TabPanel.astro";
+import TrialGrid from "../components/TrialGrid.astro";
+import VideoPanel from "../components/VideoPanel.astro";
 
-import { Content, frontmatter } from "../paper.mdx";
+import { bibtex, paper } from "../data/paper";
+import { charts, tables } from "../data/results";
+import { demonstrations, robotTrials, teaserVideos } from "../data/media";
 
-interface Frontmatter {
-  title: string;
-  description?: string;
-  favicon: string;
-  thumbnail?: string;
-  theme?: "device" | "light" | "dark";
-}
+import fig1 from "../assets/figures/fig1-overview.png";
+import fig2 from "../assets/figures/fig2-training.png";
+import fig3 from "../assets/figures/fig3-localization.png";
+import fig4 from "../assets/figures/fig4-robot.png";
 
-const {
-  title,
-  description,
-  favicon,
-  thumbnail,
-  theme = "device",
-} = frontmatter as Frontmatter;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const pageTitle = `${paper.name}: ${paper.title}`;
 
-const baseUrl = import.meta.env.BASE_URL;
-const prefix = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+// Link-preview card image; absolute when the deploy passes --site.
+const og = await getImage({ src: fig1, format: "jpg", quality: 85 });
+const ogImage = Astro.site ? new URL(og.src, Astro.site).href : og.src;
 ---
 
 <!doctype html>
-<html class="bg-white dark:bg-zinc-900" lang="en" data-theme={theme}>
+<html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    {description && <meta name="description" content={description} />}
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={paper.summary} />
+    <link rel="icon" type="image/svg+xml" href={base + "favicon.svg"} />
 
-    <link rel="icon" type="image/svg+xml" href={prefix + favicon} />
-
-    <meta property="og:title" content={title} />
-    {description && <meta property="og:description" content={description} />}
     <meta property="og:type" content="website" />
-    {thumbnail && <meta property="og:image" content={prefix + thumbnail} />}
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={paper.summary} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
 
-    <Font
-      cssVariable="--font-noto-sans"
-      preload={[{ subset: "latin", style: "normal" }]}
-    />
-
-    <title>{title}</title>
+    <Font cssVariable="--font-inter" preload />
+    <Font cssVariable="--font-display" preload />
+    <Font cssVariable="--font-plex-mono" />
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
   </head>
-  <body
-    class="prose prose-lg prose-zinc dark:prose-invert prose-a:text-blue-600 prose-a:hover:text-blue-900 prose-a:dark:text-blue-200 prose-a:dark:hover:text-blue-100 prose-a:underline prose-a:decoration-dashed prose-a:underline-offset-4 prose-a:hover:decoration-solid prose-a:font-normal prose-code:bg-zinc-200 prose-code:dark:bg-zinc-800 prose-code:text-zinc-800 prose-code:dark:text-zinc-200 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-medium prose-code:before:content-none prose-code:after:content-none max-w-none pt-16 pb-6 font-(family-name:--font-noto-sans)"
-  >
-    <main>
-      <Content components={{ table: Table }} />
-    </main>
-    <footer class="mx-auto max-w-[50rem] px-6 text-center">
-      <p class="prose-sm text-center">
-        Built with <a
-          href="https://research-template.roman.technology"
-          rel="nofollow">Roman Hauksson-Neill's project page template</a
+  <body>
+    <div class="wrap">
+      <header>
+        <Logo />
+        <h1 class="subtitle">
+          <span class="visually-hidden">{paper.name}: </span>{paper.title}
+        </h1>
+        <div class="hand-rule" aria-hidden="true"></div>
+        <p class="authors">
+          {
+            paper.authors.map((a) => (
+              <>
+                {/* prettier-ignore */}
+                <span class="author">{a.url ? <a href={a.url}>{a.name}</a> : a.name}<sup>{[...a.affiliations, ...(a.marks ?? [])].join(",")}</sup></span>{" "}
+              </>
+            ))
+          }
+        </p>
+        <p class="affils">
+          {
+            paper.affiliations.map((name, k) => (
+              <>
+                {/* prettier-ignore */}
+                <span><sup>{k + 1}</sup>{name}</span>{" "}
+              </>
+            ))
+          }
+        </p>
+        {
+          paper.notes.length > 0 && (
+            <p class="affils">
+              {paper.notes.map((n) => (
+                <>
+                  {/* prettier-ignore */}
+                  <span><sup>{n.mark}</sup>{n.text}</span>{" "}
+                </>
+              ))}
+            </p>
+          )
+        }
+        <p class="venue">{paper.venue} · {paper.track}</p>
+        <p class="summary">{paper.summary}</p>
+        <nav class="btns" aria-label="Paper links">
+          {
+            paper.links.map((l) =>
+              l.url ? (
+                <a class="btn solid" href={l.url} target="_blank" rel="noopener">
+                  {l.label}
+                </a>
+              ) : (
+                <span class="btn soon" aria-disabled="true" title="Coming soon">
+                  {l.label}
+                  <small>soon</small>
+                </span>
+              ),
+            )
+          }
+          <a class="btn" href="#results">Results</a>
+          <a class="btn" href="#demonstrations">Demonstrations</a>
+          <a class="btn" href="#robot">Robot execution</a>
+        </nav>
+      </header>
+
+      <section class="teaser" aria-label="Overview">
+        <TabBar
+          sec="teaser"
+          label="Overview"
+          centered
+          tabs={[{ label: "pipeline overview" }, ...teaserVideos.map((v) => ({ label: v.tab }))]}
+        />
+        <div class="panel" data-sec="teaser">
+          <TabPanel sec="teaser" i={0}>
+            <Figure
+              src={fig1}
+              priority
+              alt="EgoDelta in four panels: an egocentric pre- and post-action demonstration recorded with Aria glasses, pre- and post-action 2DGS reconstructions for deleafing and harvesting, removal-score maps with the extracted attachment target, and a robot executing the generated trajectory on a tomato-vine rig."
+            >
+              <b>Overview of EgoDelta.</b> From an egocentric removal demonstration, EgoDelta reconstructs the
+              pre- and post-action scene states with 2DGS, localizes the removed component, and recovers its 3D
+              attachment target. It combines the recovered target with demonstrated motion to generate
+              robot-specific trajectories for learning and execution.
+            </Figure>
+          </TabPanel>
+          {
+            teaserVideos.map((v, k) => (
+              <TabPanel sec="teaser" i={k + 1}>
+                <VideoPanel src={v.src} bare />
+                <p class="teaser-caption">{v.caption}</p>
+              </TabPanel>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="abstract" id="abstract">
+        <h2>Abstract</h2>
+        <p>{paper.abstract}</p>
+      </section>
+
+      <section id="results">
+        <h2>Quantitative results</h2>
+        <p class="sub">
+          Headline numbers from the paper's main tables: 30 tomato-vine scenes, 60 harvesting and deleafing
+          interventions, 160 attachment targets and 180 physical robot trials. Hover a bar for the per-setting
+          breakdown.
+        </p>
+        <div class="qgrid">
+          {charts.map((c) => <BarChart chart={c} />)}
+        </div>
+        <details class="qtables">
+          <summary>Show the full tables from the paper</summary>
+          <TabBar sec="tables" label="Result tables" tabs={tables.map((t) => ({ label: t.tab }))} />
+          <div class="panel" data-sec="tables">
+            {
+              tables.map((t, i) => (
+                <TabPanel sec="tables" i={i}>
+                  <ResultTableView table={t} />
+                </TabPanel>
+              ))
+            }
+          </div>
+        </details>
+        <div class="qtip" id="qtip" aria-hidden="true"></div>
+      </section>
+
+      <section id="method">
+        <h2>How EgoDelta works</h2>
+        <p class="sub">
+          A completed removal leaves a persistent change in the scene. EgoDelta compares 3D reconstructions from
+          before and after the action to find what was removed and where it was attached, then turns that target
+          into robot supervision. No attachment-target annotations are needed.
+        </p>
+        <ol class="steps">
+          {
+            paper.method.map((s, i) => (
+              <li class="step">
+                <span class="step-num">{String(i + 1).padStart(2, "0")}</span>
+                <h3>{s.title}</h3>
+                <p>{s.text}</p>
+              </li>
+            ))
+          }
+        </ol>
+        <Figure
+          src={fig2}
+          maxWidth="920px"
+          alt="Training diagram: recovered attachment targets for deleafing and harvesting supervise an attachment-target predictor, an object detector with a target head that outputs projected 2D target heatmaps, while generated robot trajectories supervise a target-conditioned policy through behavior cloning with an L2 loss."
         >
-      </p>
-    </footer>
+          <b>Attachment-target-conditioned training.</b> Recovered targets supervise the image-space
+          attachment-target predictor and condition policy learning; robot-specific trajectories provide
+          behavior-cloning supervision. At deployment, both use only the current robot RGB-D observation and state.
+        </Figure>
+      </section>
+
+      <section id="localization">
+        <h2>Removed-component localization</h2>
+        <p class="sub">
+          Qualitative comparison on one harvesting and one deleafing example, with the RGB overlay on top and the
+          binary prediction below. Competing methods often respond to foliage or reconstruction artifacts, while
+          EgoDelta keeps the thin extent of the removed component.
+        </p>
+        <Figure
+          src={fig3}
+          alt="Grid comparing point-cloud residual, YOLOE-Seg, SAM 3, 3DGS-CD, GS-DIFF, MV3DCD, EgoDelta and the reference on a harvesting and a deleafing example. Baselines show many false-positive regions on foliage; EgoDelta's prediction closely follows the reference boundary."
+        >
+          <b>Qualitative comparison of 2D removed-component localization.</b> EgoDelta more consistently preserves
+          the thin extent of removed components while suppressing responses to foliage and reconstruction
+          artifacts.
+        </Figure>
+      </section>
+
+      <section id="demonstrations">
+        <h2>From demonstration to attachment target</h2>
+        <p class="sub">
+          Egocentric removal demonstrations, the independently reconstructed pre- and post-action 2DGS scenes,
+          and the observability-weighted removal scores with the recovered 3D attachment target.
+        </p>
+        <ClipTabs sec="demos" label="Demonstrations" clips={demonstrations} />
+      </section>
+
+      <section id="robot">
+        <h2>Robot execution</h2>
+        <p class="sub">
+          A fixed-base RB-Y1 with one 7-DoF arm and an interaction-specific end effector, tested on held-out
+          arrangements disjoint from the perception benchmark. A trial succeeds only if the intended component is
+          removed without contacting another target, damaging the plant, triggering a safety stop, or requiring
+          intervention.
+        </p>
+        <Figure
+          src={fig4}
+          alt="Deleafing and harvesting examples: egocentric demonstration frames with the target highlighted, next to the robot following the generated trajectory to the attachment target on the tomato-vine rig."
+        >
+          <b>From recovered attachment targets to robot execution.</b> The recovered target anchors robot contact,
+          while demonstration-derived motion and the interaction and robot specifications instantiate a feasible
+          robot-specific trajectory.
+        </Figure>
+        <TrialGrid />
+        <h3 class="videos-head">Execution videos</h3>
+        <ClipTabs sec="robot" label="Robot execution videos" clips={robotTrials} />
+      </section>
+
+      <section id="citation">
+        <h2>Citation</h2>
+        <div class="bib">
+          <button id="copy-bibtex" type="button">copy</button>
+          <pre id="bibtex">{bibtex}</pre>
+        </div>
+      </section>
+
+      <footer>
+        <div class="hand-rule" aria-hidden="true"></div>
+        &copy; {new Date().getFullYear()}
+        {paper.name} authors · Hosted on GitHub Pages
+      </footer>
+    </div>
+
+    <script>
+      import "../scripts/page.ts";
+    </script>
   </body>
 </html>
