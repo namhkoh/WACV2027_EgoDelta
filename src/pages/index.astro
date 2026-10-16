@@ -15,7 +15,7 @@ import VideoPanel from "../components/VideoPanel.astro";
 
 import { bibtex, paper } from "../data/paper";
 import { charts, tables } from "../data/results";
-import { demonstrations, robotTrials, teaserVideos } from "../data/media";
+import { demonstration, robotTrials, teaserVideos } from "../data/media";
 
 import fig1 from "../assets/figures/fig1-overview.png";
 import fig2 from "../assets/figures/fig2-training.png";
@@ -226,10 +226,17 @@ const ogImage = Astro.site ? new URL(og.src, Astro.site).href : og.src;
       <section id="demonstrations">
         <h2>From demonstration to attachment target</h2>
         <p class="sub">
-          Egocentric removal demonstrations, the independently reconstructed pre- and post-action 2DGS scenes,
-          and the observability-weighted removal scores with the recovered 3D attachment target.
+          A sample egocentric removal demonstration, the independently reconstructed pre- and post-action 2DGS
+          scenes, and the observability-weighted removal scores with the recovered 3D attachment target.
         </p>
-        <ClipTabs sec="demos" label="Demonstrations" clips={demonstrations} />
+        {/* Untabbed, but uses the panel markup so page.ts loads the videos when they scroll into view. */}
+        <div class="panel" data-sec="demos">
+          <div class="panel-item" data-i="0">
+            <div class="grid grid4">
+              {demonstration.map((p) => <VideoPanel src={p.src} label={p.label} ours={p.ours} aspect={p.aspect} />)}
+            </div>
+          </div>
+        </div>
       </section>
 
       <section id="robot">
@@ -251,7 +258,7 @@ const ogImage = Astro.site ? new URL(og.src, Astro.site).href : og.src;
         <TrialGrid />
         <h3 class="videos-head">Learned policy on the robot</h3>
         <p class="videos-note">
-          The target-conditioned policy acting from the robot's own RGB-D observations, shown at 2× speed.
+          The target-conditioned policy acting from the robot's own RGB-D observations.
         </p>
         <ClipTabs sec="robot" label="Robot execution videos" clips={robotTrials} />
       </section>

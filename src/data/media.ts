@@ -30,39 +30,26 @@ export const teaserVideos: { tab: string; src: string; caption: string; aspect: 
     tab: "harvesting",
     src: "videos/teaser_harvesting.mp4",
     aspect: WIDE,
-    caption: "Harvesting with the EgoDelta learned policy (2× speed).",
+    caption: "Harvesting with the EgoDelta learned policy.",
   },
   {
     tab: "deleafing",
     src: "videos/teaser_deleafing.mp4",
     // Three portrait trials side by side.
     aspect: "1238 / 720",
-    caption: "Deleafing with the EgoDelta learned policy, three trials (2× speed).",
+    caption: "Deleafing with the EgoDelta learned policy, three trials.",
   },
 ];
 
-function demo(id: string, tab: string, group: string, title: string): Clip {
-  return {
-    tab,
-    group,
-    title,
-    panels: [
-      { label: "Egocentric demonstration", src: `videos/${id}_demo.mp4`, aspect: EGO },
-      { label: "Pre-action 2DGS", src: `videos/${id}_pre.mp4`, aspect: EGO },
-      { label: "Post-action 2DGS", src: `videos/${id}_post.mp4`, aspect: EGO },
-      { label: "Removal score + attachment target", src: `videos/${id}_target.mp4`, aspect: EGO, ours: true },
-    ],
-  };
-}
-
-export const demonstrations: Clip[] = [
-  demo("harvest1", "tomato #1", "Harvesting", "Harvesting — tomato #1"),
-  demo("harvest2", "tomato #2", "Harvesting", "Harvesting — tomato #2"),
-  demo("deleaf1", "leaf #1", "Deleafing", "Deleafing — leaf #1"),
-  demo("deleaf2", "leaf #2", "Deleafing", "Deleafing — leaf #2"),
+// One sample removal, shown as a single row of four panels.
+export const demonstration: Panel[] = [
+  { label: "Egocentric demonstration", src: "videos/demo_egocentric.mp4", aspect: EGO },
+  { label: "Pre-action 2DGS", src: "videos/demo_pre_2dgs.mp4", aspect: EGO },
+  { label: "Post-action 2DGS", src: "videos/demo_post_2dgs.mp4", aspect: EGO },
+  { label: "Removal score + attachment target", src: "videos/demo_target.mp4", aspect: EGO, ours: true },
 ];
 
-// Learned-policy runs filmed with a phone and sped up 2x: harvesting is
+// Learned-policy runs filmed with a phone and sped up 3x: harvesting is
 // landscape, deleafing portrait.
 function policy(task: string, n: number, aspect: string): Panel[] {
   return Array.from({ length: n }, (_, k) => ({
