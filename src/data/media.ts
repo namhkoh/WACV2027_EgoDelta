@@ -23,17 +23,21 @@ export type Clip = {
 // Project Aria RGB frames are square fisheye images.
 const EGO = "1 / 1";
 const WIDE = "16 / 9";
+const TALL = "9 / 16";
 
-export const teaserVideos: { tab: string; src: string; caption: string }[] = [
+export const teaserVideos: { tab: string; src: string; caption: string; aspect: string }[] = [
   {
     tab: "harvesting",
     src: "videos/teaser_harvesting.mp4",
-    caption: "Harvesting: egocentric demonstration and EgoDelta robot execution.",
+    aspect: WIDE,
+    caption: "Harvesting with the EgoDelta learned policy (2× speed).",
   },
   {
     tab: "deleafing",
     src: "videos/teaser_deleafing.mp4",
-    caption: "Deleafing: egocentric demonstration and EgoDelta robot execution.",
+    // Three portrait trials side by side.
+    aspect: "1238 / 720",
+    caption: "Deleafing with the EgoDelta learned policy, three trials (2× speed).",
   },
 ];
 
@@ -58,22 +62,17 @@ export const demonstrations: Clip[] = [
   demo("deleaf2", "leaf #2", "Deleafing", "Deleafing — leaf #2"),
 ];
 
-function trial(id: string, tab: string, group: string, title: string): Clip {
-  return {
-    tab,
-    group,
-    title,
-    panels: [
-      { label: "Human-motion retargeting", src: `videos/robot_${id}_retarget.mp4`, aspect: WIDE },
-      { label: "EgoDelta trajectory (ours)", src: `videos/robot_${id}_trajectory.mp4`, aspect: WIDE, ours: true },
-      { label: "EgoDelta learned policy (ours)", src: `videos/robot_${id}_policy.mp4`, aspect: WIDE, ours: true },
-    ],
-  };
+// Learned-policy runs filmed with a phone and sped up 2x: harvesting is
+// landscape, deleafing portrait.
+function policy(task: string, n: number, aspect: string): Panel[] {
+  return Array.from({ length: n }, (_, k) => ({
+    label: `Trial ${k + 1}`,
+    src: `videos/robot_${task}${k + 1}_policy.mp4`,
+    aspect,
+  }));
 }
 
 export const robotTrials: Clip[] = [
-  trial("harvest1", "trial #1", "Harvesting", "Harvesting — trial #1"),
-  trial("harvest2", "trial #2", "Harvesting", "Harvesting — trial #2"),
-  trial("deleaf1", "trial #1", "Deleafing", "Deleafing — trial #1"),
-  trial("deleaf2", "trial #2", "Deleafing", "Deleafing — trial #2"),
+  { tab: "harvesting", title: "Harvesting", panels: policy("harvest", 2, WIDE) },
+  { tab: "deleafing", title: "Deleafing", panels: policy("deleaf", 3, TALL) },
 ];

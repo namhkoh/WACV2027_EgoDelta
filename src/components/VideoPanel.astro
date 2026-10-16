@@ -7,6 +7,7 @@ interface Props {
   src: string;
   label?: string;
   ours?: boolean;
+  /** Reserves the box before the video loads; should match the video's shape. */
   aspect?: string;
   /** Rounded media without the card frame (used by the teaser). */
   bare?: boolean;
@@ -22,7 +23,7 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 <figure class:list={[bare ? "bare" : "card", { ours }]}>
   {
     exists ? (
-      <video data-src={base + src} loop muted playsinline preload="none" />
+      <video data-src={base + src} style={`aspect-ratio:${aspect}`} loop muted playsinline preload="none" />
     ) : (
       <div class="placeholder" style={`aspect-ratio:${aspect}`}>
         <svg viewBox="0 0 24 24" aria-hidden="true">

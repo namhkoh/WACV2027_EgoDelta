@@ -138,7 +138,7 @@ const ogImage = Astro.site ? new URL(og.src, Astro.site).href : og.src;
           {
             teaserVideos.map((v, k) => (
               <TabPanel sec="teaser" i={k + 1}>
-                <VideoPanel src={v.src} bare />
+                <VideoPanel src={v.src} aspect={v.aspect} bare />
                 <p class="teaser-caption">{v.caption}</p>
               </TabPanel>
             ))
@@ -249,7 +249,10 @@ const ogImage = Astro.site ? new URL(og.src, Astro.site).href : og.src;
           robot-specific trajectory.
         </Figure>
         <TrialGrid />
-        <h3 class="videos-head">Execution videos</h3>
+        <h3 class="videos-head">Learned policy on the robot</h3>
+        <p class="videos-note">
+          The target-conditioned policy acting from the robot's own RGB-D observations, shown at 2× speed.
+        </p>
         <ClipTabs sec="robot" label="Robot execution videos" clips={robotTrials} />
       </section>
 

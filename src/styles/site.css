@@ -759,8 +759,13 @@ figure.bare .placeholder {
   letter-spacing: -0.018em;
   margin-top: 56px;
 }
-.videos-head + .tabs {
-  margin-top: 14px;
+.videos-note {
+  color: var(--muted);
+  font-size: 15px;
+  margin-top: 4px;
+}
+.videos-note + .tabs {
+  margin-top: 16px;
 }
 
 /* Robot trial grid */
