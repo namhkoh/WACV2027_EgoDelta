@@ -449,6 +449,33 @@ section.teaser {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Demonstration -> pipeline -> robot, with chevrons between the panels. */
+.flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+.flow-arrow::before {
+  content: "";
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-top: 2px solid var(--grey-2);
+  border-right: 2px solid var(--grey-2);
+  transform: translateX(-3px) rotate(45deg);
+}
+@media (max-width: 760px) {
+  .flow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .flow-arrow {
+    justify-self: center;
+  }
+  .flow-arrow::before {
+    transform: translateY(-3px) rotate(135deg);
+  }
+}
 figure.card {
   background: var(--card);
   border: 1px solid var(--line);

@@ -227,16 +227,24 @@ const ogImage = Astro.site ? new URL(og.src, Astro.site).href : og.src;
       </section>
 
       <section id="demonstrations">
-        <h2>From demonstration to attachment target</h2>
+        <h2>From demonstration to robot motion</h2>
         <p class="sub">
-          A sample egocentric removal demonstration, the independently reconstructed pre- and post-action 2DGS
-          scenes, and the observability-weighted removal scores with the recovered 3D attachment target.
+          A deleafing demonstration recorded with Project Aria glasses, from pre-action views through the removal to
+          post-action views. The middle panel illustrates what EgoDelta does with it: reconstruct both scene states,
+          score the removed branch, place the attachment target, and plan a robot trajectory that reaches it.
         </p>
         {/* Untabbed, but uses the panel markup so page.ts loads the videos when they scroll into view. */}
         <div class="panel" data-sec="demos">
           <div class="panel-item" data-i="0">
-            <div class="grid grid4">
-              {demonstration.map((p) => <VideoPanel src={p.src} label={p.label} ours={p.ours} aspect={p.aspect} />)}
+            <div class="flow">
+              {
+                demonstration.map((p, i) => (
+                  <>
+                    {i > 0 && <span class="flow-arrow" aria-hidden="true" />}
+                    <VideoPanel src={p.src} label={p.label} ours={p.ours} aspect={p.aspect} />
+                  </>
+                ))
+              }
             </div>
           </div>
         </div>

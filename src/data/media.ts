@@ -41,12 +41,12 @@ export const teaserVideos: { tab: string; src: string; caption: string; aspect: 
   },
 ];
 
-// One sample removal, shown as a single row of four panels.
+// One sample deleafing removal, left to right: the Aria demonstration, an illustrative animation of the
+// pipeline built from its frames (tools/demo-film), and the robot performing the task.
 export const demonstration: Panel[] = [
   { label: "Egocentric demonstration", src: "videos/demo_egocentric.mp4", aspect: EGO },
-  { label: "Pre-action 2DGS", src: "videos/demo_pre_2dgs.mp4", aspect: EGO },
-  { label: "Post-action 2DGS", src: "videos/demo_post_2dgs.mp4", aspect: EGO },
-  { label: "Removal score + attachment target", src: "videos/demo_target.mp4", aspect: EGO, ours: true },
+  { label: "EgoDelta pipeline (illustration)", src: "videos/demo_pipeline.mp4", aspect: EGO, ours: true },
+  { label: "Robot execution", src: "videos/demo_robot.mp4", aspect: EGO },
 ];
 
 // Learned-policy runs filmed with a phone and sped up 3x: harvesting is

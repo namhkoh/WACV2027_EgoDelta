@@ -28,7 +28,7 @@ Each video slot shows a "video coming soon" placeholder until a file exists at i
 | Section | Files in `public/videos/` |
 | --- | --- |
 | Teaser tabs | `teaser_harvesting.mp4`, `teaser_deleafing.mp4` |
-| Sample demonstration (one row) | `demo_egocentric.mp4`, `demo_pre_2dgs.mp4`, `demo_post_2dgs.mp4`, `demo_target.mp4` |
+| Demonstration to robot motion (one row) | `demo_egocentric.mp4`, `demo_pipeline.mp4` (illustrative animation), `demo_robot.mp4` |
 | Robot execution, learned policy | `robot_harvest1_policy.mp4`, `robot_harvest2_policy.mp4`, `robot_deleaf1_policy.mp4` to `robot_deleaf3_policy.mp4` |
 
 To rename clips, add more tabs, or change panel labels, edit `src/data/media.ts`. Videos play muted and looped and only load when their tab is opened. H.264 MP4s of a few MB each work best; for example:
