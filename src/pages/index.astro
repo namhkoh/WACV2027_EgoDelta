@@ -14,7 +14,7 @@ import TrialGrid from "../components/TrialGrid.astro";
 import VideoPanel from "../components/VideoPanel.astro";
 
 import { bibtex, paper } from "../data/paper";
-import { charts, tables } from "../data/results";
+import { charts, localization, tables } from "../data/results";
 import { demonstration, robotTrials, teaserVideos } from "../data/media";
 
 import fig1 from "../assets/figures/fig1-overview.png";
@@ -24,6 +24,8 @@ import fig4 from "../assets/figures/fig4-robot.png";
 
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const pageTitle = `${paper.name}: ${paper.title}`;
+// Table 1 is always shown; the others sit behind the "Show Tables 2–5" toggle.
+const moreTables = tables.filter((t) => t !== localization);
 
 // Link-preview card image; absolute when the deploy passes --site.
 const og = await getImage({ src: fig1, format: "jpg", quality: 85 });
@@ -161,12 +163,13 @@ const ogImage = Astro.site ? new URL(og.src, Astro.site).href : og.src;
         <div class="qgrid">
           {charts.map((c) => <BarChart chart={c} />)}
         </div>
+        <ResultTableView table={localization} />
         <details class="qtables">
-          <summary>Show the full tables from the paper</summary>
-          <TabBar sec="tables" label="Result tables" tabs={tables.map((t) => ({ label: t.tab }))} />
+          <summary>Show Tables 2–5 from the paper</summary>
+          <TabBar sec="tables" label="Result tables" tabs={moreTables.map((t) => ({ label: t.tab }))} />
           <div class="panel" data-sec="tables">
             {
-              tables.map((t, i) => (
+              moreTables.map((t, i) => (
                 <TabPanel sec="tables" i={i}>
                   <ResultTableView table={t} />
                 </TabPanel>

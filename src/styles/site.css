@@ -642,8 +642,11 @@ figure.bare .placeholder {
 }
 
 /* Result tables */
+.qgrid + .rtable {
+  margin-top: 36px;
+}
 .qtables {
-  margin-top: 22px;
+  margin-top: 28px;
 }
 .qtables > summary {
   display: inline-flex;
